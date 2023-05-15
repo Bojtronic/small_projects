@@ -69,6 +69,8 @@ def crear_cuadricula():
     
     # Establece las coordenadas x del canvas en el centro horizontal de la ventana
     cuadricula.place(x=(screen_width-400)/4, y=0)
+    cuadricula.configure(bg=gris_claro)
+    cuadricula.config(highlightbackground=gris_claro)
     #cuadricula.pack(side="top", padx=0, pady=0)  # Agrega padding para separar el canvas del borde de la ventana
     cuadricula.update()  # Actualiza el canvas para que tenga las dimensiones correctas
     
@@ -77,12 +79,33 @@ def crear_cuadricula():
     for i in range(9):
         row = []
         for j in range(9): 
-            square = tk.Entry(cuadricula, width=2, font=('Arial', 16))
+            square = tk.Entry(cuadricula, width=2, font=('Arial', 22))
+            if j%2 == 0:
+                
+            
+                texto = "15/56"
+                label = tk.Label(square, text=texto, font=('Arial', 8))
+                square.delete(0, tk.END) # Elimina cualquier contenido previo del Entry
+                
+                #square.insert(0, texto) # Inserta el texto en el Entry
+                #square.configure(bg="red")
+                #label.configure(bg='gray')
+                square.config(state='disabled') # Deshabilita el Entry
+                #label.config(state='disabled')
+                # Calcula la posición x del cuadro centrado en la celda
+                x = (j + 0.5) * 40 - square.winfo_reqwidth()/2
+                
+                # Calcula la posición y del cuadro centrado en la celda
+                y = (i + 0.5) * 40 - square.winfo_reqheight()/2
+                
+                label.place(x=x, y=y)
+                
             # Calcula la posición x del cuadro centrado en la celda
             x = (j + 0.5) * 40 - square.winfo_reqwidth()/2
-            
+                
             # Calcula la posición y del cuadro centrado en la celda
             y = (i + 0.5) * 40 - square.winfo_reqheight()/2
+            
             cuadricula.create_window(x, y, anchor="nw", window=square)  # Agrega el cuadro al canvas
             row.append(square)
         
@@ -175,8 +198,6 @@ def borrar_items():
     archivo_boton.place_forget()
     
     
-    
-    #cuadricula.delete("all")
     cuadricula.pack()
     cuadricula.pack_forget()
     
