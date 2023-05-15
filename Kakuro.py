@@ -79,32 +79,35 @@ def crear_cuadricula():
     for i in range(9):
         row = []
         for j in range(9): 
-            square = tk.Entry(cuadricula, width=2, font=('Arial', 22))
-            if j%2 == 0:
-                
-            
-                texto = "15/56"
-                label = tk.Label(square, text=texto, font=('Arial', 8))
-                square.delete(0, tk.END) # Elimina cualquier contenido previo del Entry
-                
-                #square.insert(0, texto) # Inserta el texto en el Entry
-                #square.configure(bg="red")
-                #label.configure(bg='gray')
-                square.config(state='disabled') # Deshabilita el Entry
-                #label.config(state='disabled')
-                # Calcula la posición x del cuadro centrado en la celda
-                x = (j + 0.5) * 40 - square.winfo_reqwidth()/2
-                
-                # Calcula la posición y del cuadro centrado en la celda
-                y = (i + 0.5) * 40 - square.winfo_reqheight()/2
-                
-                label.place(x=x, y=y)
-                
+            square = tk.Entry(cuadricula, width=2, font=('Arial', 24))
             # Calcula la posición x del cuadro centrado en la celda
             x = (j + 0.5) * 40 - square.winfo_reqwidth()/2
                 
             # Calcula la posición y del cuadro centrado en la celda
             y = (i + 0.5) * 40 - square.winfo_reqheight()/2
+            
+            if i == 0:
+
+                texto = str(i)+" / "+str(j)
+                label = tk.Label(square, text=texto, font=('Arial', 8))
+                square.delete(0, tk.END) # Elimina cualquier contenido previo del Entry
+       
+                #square.insert(0, texto) # Inserta el texto en el Entry
+                #square.configure(bg="red")
+                #label.configure(bg='gray')
+                square.config(state='disabled') # Deshabilita el Entry
+                #label.config(state='disabled')
+                                
+                label.place(x=i*24, y=y)
+                
+            if j == 0:
+                texto = str(i)+" / "+str(j)
+                label = tk.Label(square, text=texto, font=('Arial', 8))
+                square.delete(0, tk.END) # Elimina cualquier contenido previo del Entry
+                
+                square.config(state='disabled') # Deshabilita el Entry
+                label.place(x=x, y=j*24)
+                
             
             cuadricula.create_window(x, y, anchor="nw", window=square)  # Agrega el cuadro al canvas
             row.append(square)
