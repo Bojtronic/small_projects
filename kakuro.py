@@ -4,7 +4,8 @@ import webbrowser
 import subprocess
 from tkinter import messagebox
 import time
-#import Juego
+import json
+
 
 #Colores
 
@@ -13,7 +14,7 @@ gris_oscuro='#252526'
 
 #Configuracion
 
-configuracion={'nivel':1,'reloj':1}
+configuracion={'nivel':'Facil','reloj':1}
 
 #Definiciones de ventana
 
@@ -68,15 +69,30 @@ label_cronometro = tk.Label(win, text="00:00:00", font=("Arial", 24),bg=gris_cla
 
 total_segundos=0
 
+# obtener partida
+
+def obtener_partida(nivel, numero_partida):
+    try:
+        with open('kakuro2023partidas.dat', 'r') as archivo:
+            contenido = archivo.read()
+            data = json.loads(contenido)
+
+            if nivel in data and f"partida_{numero_partida}" in data[nivel]:
+                partida = data[nivel][f"partida_{numero_partida}"]
+                return partida
+            else:
+                print("No se encontró la partida especificada.")
+    except:
+        print("Ocurrió un error al leer el archivo.")
+
+    return []
+
+
 # creacion de cuadricula
-def crear_cuadricula():
-    """
-    Tipo de clave: 1 para fila, 2 para columna
-    Valor de la clave
-    Número de fila donde va la clave
-    Número de columna donde va la clave
-    Número de casillas para esa clave
-    """
+def crear_cuadricula(nivel, numero_partida):
+    
+    partida = obtener_partida(nivel, numero_partida)
+    
     # Establece las coordenadas x del canvas en el centro horizontal de la ventana
     cuadricula.place(x=(screen_width-400)/4, y=0)
     cuadricula.configure(bg=gris_claro)
@@ -94,63 +110,82 @@ def crear_cuadricula():
             y = ((i + 0.5) * 40 - square.winfo_reqheight() / 2)
             
             
-            
-            
-            if j == 0:
+            if partida[i][j] == 0:
                 square.delete(0, tk.END)  # Elimina cualquier contenido previo del Entry
                 square.config(state='disabled')  # Deshabilita el Entry
-                texto = str(i) + "\\" + str(j)
+                #texto = str(i) + "\\" + str(j)
+                texto = ""
                 label_x = x + square.winfo_reqwidth() / 2
                 label_y = y + square.winfo_reqheight() / 2
                 label = tk.Label(cuadricula, text=texto, font=('Arial', 8))
                 label.place(x=label_x, y=label_y)
             
-            if j == 1 and (i == 0 or i == 5 or i == 6):
-                square.delete(0, tk.END)  # Elimina cualquier contenido previo del Entry
-                square.config(state='disabled')  # Deshabilita el Entry
-                texto = str(i) + "\\" + str(j)
-                label_x = x + square.winfo_reqwidth() / 2
-                label_y = y + square.winfo_reqheight() / 2
-                label = tk.Label(cuadricula, text=texto, font=('Arial', 8))
-                label.place(x=label_x, y=label_y)
             
-            if (j == 2 and i == 0) or (j == 7 and i == 0):
+            if partida[i][j] == 1000: # 1000 indica que la pista es de columna
                 square.delete(0, tk.END)  # Elimina cualquier contenido previo del Entry
                 square.config(state='disabled')  # Deshabilita el Entry
-                texto = str(i) + "\\" + str(j)
-                label_x = x + square.winfo_reqwidth() / 2
-                label_y = y + square.winfo_reqheight() / 2
-                label = tk.Label(cuadricula, text=texto, font=('Arial', 8))
-                label.place(x=label_x, y=label_y)
                 
-            if (j == 3 and (i == 0 or i == 1 or i == 2 or i == 7 or i == 8)) or (j == 6 and (i == 0 or i == 1 or i == 2 or i == 7 or i == 8)):
-                square.delete(0, tk.END)  # Elimina cualquier contenido previo del Entry
-                square.config(state='disabled')  # Deshabilita el Entry
-                texto = str(i) + "\\" + str(j)
-                label_x = x + square.winfo_reqwidth() / 2
-                label_y = y + square.winfo_reqheight() / 2
-                label = tk.Label(cuadricula, text=texto, font=('Arial', 8))
-                label.place(x=label_x, y=label_y)
-            
-            if (j == 4 and (i == 0 or i == 4 or i == 5)) or (j == 5 and (i == 0 or i == 4 or i == 5)):
-                square.delete(0, tk.END)  # Elimina cualquier contenido previo del Entry
-                square.config(state='disabled')  # Deshabilita el Entry
-                texto = str(i) + "\\" + str(j)
-                label_x = x + square.winfo_reqwidth() / 2
-                label_y = y + square.winfo_reqheight() / 2
-                label = tk.Label(cuadricula, text=texto, font=('Arial', 8))
-                label.place(x=label_x, y=label_y)
-                
-            if j == 8 and (i == 0 or i == 3 or i == 4):
-                square.delete(0, tk.END)  # Elimina cualquier contenido previo del Entry
-                square.config(state='disabled')  # Deshabilita el Entry
-                texto = str(i) + "\\" + str(j)
-                label_x = (x + square.winfo_reqwidth() / 2) - 1
-                label_y = (y + square.winfo_reqheight() / 2) - 1
-                label = tk.Label(cuadricula, text=texto, font=('Arial', 8))
-                label.place(x=label_x, y=label_y)
+                pista_columna = 0
+                                
+                """
+                row = i+1
                 
                 
+                while ((partida[row][j])!=1000 and (partida[row][j])!=2000 and (partida[row][j])!=3000) and row < len(partida):
+                    pista_columna += partida[row][j]
+                    row += 1
+                """         
+                                
+                texto = str(pista_columna) + "\\"
+                label_x = x + square.winfo_reqwidth() / 2
+                label_y = y + square.winfo_reqheight() / 2
+                label = tk.Label(cuadricula, text=texto, font=('Arial', 8))
+                label.place(x=label_x, y=label_y)
+                        
+            if partida[i][j] == 2000: # 2000 indica que la pista es de fila
+                square.delete(0, tk.END)  # Elimina cualquier contenido previo del Entry
+                square.config(state='disabled')  # Deshabilita el Entry
+                
+                pista_fila = 0
+                
+                
+                """
+                col = j
+                
+                while ((partida[i][col])!=1000 and (partida[i][col])!=2000 and (partida[i][col])!=3000) and col < len(partida):
+                    pista_columna += partida[i][col]
+                    col += 1
+                """   
+
+                
+                texto = "\\" + str(pista_fila)
+                label_x = x + square.winfo_reqwidth() / 2
+                label_y = y + square.winfo_reqheight() / 2
+                label = tk.Label(cuadricula, text=texto, font=('Arial', 8))
+                label.place(x=label_x, y=label_y)    
+                
+                
+            if partida[i][j] == 3000: # 3000 indica que la pista es de fila y columna
+                square.delete(0, tk.END)  # Elimina cualquier contenido previo del Entry
+                square.config(state='disabled')  # Deshabilita el Entry
+                
+                pista_columna = 0
+                pista_fila = 0
+                
+                """
+                row = i
+                
+                while ((partida[row][j])!=1000 and (partida[row][j])!=2000 and (partida[row][j])!=3000) and row < len(partida):
+                    pista_columna += partida[row][j]
+                    row += 1
+                """   
+    
+                
+                texto = str(pista_columna) + "\\" + str(pista_fila)
+                label_x = x + square.winfo_reqwidth() / 2
+                label_y = y + square.winfo_reqheight() / 2
+                label = tk.Label(cuadricula, text=texto, font=('Arial', 8))
+                label.place(x=label_x, y=label_y)
            
             cuadricula.create_window(x, y, anchor="nw", window=square)  # Agrega el cuadro al canvas
             row.append(square)
@@ -205,9 +240,14 @@ def iniciar_juego():
         jugador_label.place(relx=0.15,rely=0.15,anchor='center')
         nombre_label.place(relx=0.15,rely=0.2,anchor='center')
 
-        
 
-        crear_cuadricula()
+
+        nivel = nivel_var.get()
+        
+        #numero_partida = randint(1, 3) 
+        numero_partida = 1
+
+        crear_cuadricula(nivel, numero_partida)
     print('Iniciar Juego')
 
 def deshacer_jugada():
@@ -259,12 +299,16 @@ if True:
 
     #Checkbuttons de configuracion
 
-    nivel_var=tk.IntVar()
+    
+    nivel_var = tk.StringVar()
     nivel = tk.Label(win, text='Nivel',bg=gris_claro,fg='white', font='dubai 15')
-    nivel_ck1=tk.Checkbutton(win, text='Facil', variable=nivel_var,bg=gris_claro,fg='white',selectcolor=gris_oscuro,onvalue=1)
-    nivel_ck2=tk.Checkbutton(win, text='Medio', variable=nivel_var,bg=gris_claro,fg='white',selectcolor=gris_oscuro,onvalue=2)
-    nivel_ck3=tk.Checkbutton(win, text='Dificil', variable=nivel_var,bg=gris_claro,fg='white',selectcolor=gris_oscuro,onvalue=3)
-    nivel_ck4=tk.Checkbutton(win, text='Experto', variable=nivel_var,bg=gris_claro,fg='white',selectcolor=gris_oscuro,onvalue=4)
+    
+    
+    nivel_ck1 = tk.Checkbutton(win, text='Facil', variable=nivel_var, bg=gris_claro, fg='white', selectcolor=gris_oscuro, onvalue='Facil')
+    nivel_ck2 = tk.Checkbutton(win, text='Medio', variable=nivel_var, bg=gris_claro, fg='white', selectcolor=gris_oscuro, onvalue='Medio')
+    nivel_ck3 = tk.Checkbutton(win, text='Dificil', variable=nivel_var, bg=gris_claro, fg='white', selectcolor=gris_oscuro, onvalue='Dificil')
+    nivel_ck4 = tk.Checkbutton(win, text='Experto', variable=nivel_var, bg=gris_claro, fg='white', selectcolor=gris_oscuro, onvalue='Experto')
+
     nivel_var.set(configuracion['nivel'])
 
     reloj_var=tk.IntVar()
