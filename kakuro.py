@@ -21,7 +21,7 @@ configuracion={'nivel':'Facil','reloj':1}
 win=tk.Tk()
 win.title(f'Kakuro 1.0')
 win.resizable(tk.FALSE,tk.FALSE)
-win.geometry('800x500')
+win.geometry('800x600')
 win.configure(bg=gris_claro)
 
 # Obtiene las dimensiones de la pantalla
@@ -69,6 +69,56 @@ label_cronometro = tk.Label(win, text="00:00:00", font=("Arial", 24),bg=gris_cla
 
 total_segundos=0
 
+# Variable para almacenar el número seleccionado
+numero_seleccionado = None
+
+#Lista de botones de numeros
+
+botones_numeros = []
+
+#Lista de squares 
+
+squares=[]
+
+#Jugadas realizadas
+
+jugadas_realizadas=[]
+
+#Jugadas Deshecha
+
+jugadas_deshechas=[]
+
+# Función para obtener el estado actual del tablero
+def obtener_estado_actual():
+    estado = []
+    # Obtener los valores de todas las casillas del tablero
+    for fila in range(9):
+        fila_estado = []
+        for columna in range(9):
+            casilla = obtener_casilla(fila, columna)
+            valor = casilla.numero
+            fila_estado.append(valor)
+        estado.append(fila_estado)
+    return estado
+
+def obtener_casilla(fila, columna):
+    return squares[fila][columna]
+
+#Funciones seleccionar numero y casilla
+
+def seleccionar_numero(numero):
+    global numero_seleccionado
+    numero_seleccionado = numero
+
+def seleccionar_casilla(casilla):
+    global numero_seleccionado
+    if not casilla.numero and numero_seleccionado:
+        casilla.config(text=str(numero_seleccionado),)
+        casilla.numero = numero_seleccionado
+        numero_seleccionado=None
+        jugadas_realizadas.append(casilla)
+        jugadas_deshechas.clear()
+        
 # obtener partida
 
 def obtener_partida(nivel, numero_partida):
@@ -87,17 +137,16 @@ def obtener_partida(nivel, numero_partida):
 
     return []
 
-
 # creacion de cuadricula
 def crear_cuadricula(nivel, numero_partida):
-    
+    global squares
     partida = obtener_partida(nivel, numero_partida)
     
     # Establece las coordenadas x del canvas en el centro horizontal de la ventana
     cuadricula.place(x=(screen_width-400)/4, y=0)
     cuadricula.configure(bg=gris_claro)
     cuadricula.config(highlightbackground=gris_claro)
-    cuadricula.pack(side="top", padx=0, pady=0)  # Agrega padding para separar el canvas del borde de la ventana
+    cuadricula.pack(side="top", padx=0, pady=20)  # Agrega padding para separar el canvas del borde de la ventana
     cuadricula.update()  # Actualiza el canvas para que tenga las dimensiones correctas
     
     squares = []
@@ -105,89 +154,85 @@ def crear_cuadricula(nivel, numero_partida):
     for i in range(9):
         row = []
         for j in range(9): 
-            square = tk.Entry(cuadricula, width=2, font=('Arial', 24))
+            square = tk.Button(cuadricula, width=2, font=('Arial', 20))
             x = ((j + 0.5) * 40 - square.winfo_reqwidth() / 2)
             y = ((i + 0.5) * 40 - square.winfo_reqheight() / 2)
             
             
             if partida[i][j] == 0:
-                square.delete(0, tk.END)  # Elimina cualquier contenido previo del Entry
-                square.config(state='disabled')  # Deshabilita el Entry
-                #texto = str(i) + "\\" + str(j)
-                texto = ""
-                label_x = x + square.winfo_reqwidth() / 2
-                label_y = y + square.winfo_reqheight() / 2
-                label = tk.Label(cuadricula, text=texto, font=('Arial', 8))
-                label.place(x=label_x, y=label_y)
+                #square.delete(0, tk.END)  # Elimina cualquier contenido previo del Entry
+                square.config(state='disabled')  # Deshabilita el Button
+                square.configure(bg='#888888')
+                #texto = ""
+                #label_x = x + square.winfo_reqwidth() / 2
+                #label_y = y + square.winfo_reqheight() / 2
+                #label = tk.Label(cuadricula, text=texto, font=('Arial', 8))
+                #label.place(x=label_x, y=label_y,anchor='center')
             
             
-            if partida[i][j] == 1000: # 1000 indica que la pista es de columna
-                square.delete(0, tk.END)  # Elimina cualquier contenido previo del Entry
-                square.config(state='disabled')  # Deshabilita el Entry
+            if partida[i][j] == 1000: # 1000 indica una pista de columna
+                square.config(state='disabled')  # Disable the button
+                square.configure(bg='#888888')
                 
                 pista_columna = 0
-                                
-                """
-                row = i+1
-                
-                
-                while ((partida[row][j])!=1000 and (partida[row][j])!=2000 and (partida[row][j])!=3000) and row < len(partida):
-                    pista_columna += partida[row][j]
-                    row += 1
-                """         
-                                
+                fila = i+1
+                      
+                while fila < len(partida) and ((partida[fila][j])!=1000 and (partida[fila][j])!=2000 and (partida[fila][j])!=3000):
+                    pista_columna += partida[fila][j]
+                    fila += 1
+                         
                 texto = str(pista_columna) + "\\"
                 label_x = x + square.winfo_reqwidth() / 2
                 label_y = y + square.winfo_reqheight() / 2
-                label = tk.Label(cuadricula, text=texto, font=('Arial', 8))
-                label.place(x=label_x, y=label_y)
-                        
-            if partida[i][j] == 2000: # 2000 indica que la pista es de fila
-                square.delete(0, tk.END)  # Elimina cualquier contenido previo del Entry
-                square.config(state='disabled')  # Deshabilita el Entry
+                label = tk.Label(cuadricula, text=texto, font=('Arial', 10, 'bold'), fg='green', bg='#888888')
+                label.place(x=label_x, y=label_y, anchor='center')
+                                    
+            if partida[i][j] == 2000: # 2000 indicates a row clue
+                square.config(state='disabled')  # Disable the button
+                square.configure(bg='#888888')
                 
-                pista_fila = 0
+                pista_fila = 0  
+                col = j+1
                 
-                
-                """
-                col = j
-                
-                while ((partida[i][col])!=1000 and (partida[i][col])!=2000 and (partida[i][col])!=3000) and col < len(partida):
-                    pista_columna += partida[i][col]
+                while col < len(partida) and ((partida[i][col])!=1000 and (partida[i][col])!=2000 and (partida[i][col])!=3000):
+                    pista_fila += partida[i][col]
                     col += 1
-                """   
+                   
 
-                
                 texto = "\\" + str(pista_fila)
                 label_x = x + square.winfo_reqwidth() / 2
                 label_y = y + square.winfo_reqheight() / 2
-                label = tk.Label(cuadricula, text=texto, font=('Arial', 8))
-                label.place(x=label_x, y=label_y)    
-                
-                
-            if partida[i][j] == 3000: # 3000 indica que la pista es de fila y columna
-                square.delete(0, tk.END)  # Elimina cualquier contenido previo del Entry
-                square.config(state='disabled')  # Deshabilita el Entry
+                label = tk.Label(cuadricula, text=texto, font=('Arial', 10, 'bold'), fg='red', bg='#888888')
+                label.place(x=label_x, y=label_y, anchor='center')
+
+            if partida[i][j] == 3000: # 3000 indicates a row and column clue
+                square.config(state='disabled')  # Disable the button
+                square.configure(bg='#888888')
                 
                 pista_columna = 0
-                pista_fila = 0
+                pista_fila = 0       
                 
-                """
-                row = i
+                fila = i+1
+                col = j+1
                 
-                while ((partida[row][j])!=1000 and (partida[row][j])!=2000 and (partida[row][j])!=3000) and row < len(partida):
-                    pista_columna += partida[row][j]
-                    row += 1
-                """   
-    
+                while fila < len(partida) and ((partida[fila][j])!=1000 and (partida[fila][j])!=2000 and (partida[fila][j])!=3000):
+                    pista_columna += partida[fila][j]
+                    fila += 1
                 
+                while col < len(partida) and ((partida[i][col])!=1000 and (partida[i][col])!=2000 and (partida[i][col])!=3000):
+                    pista_fila += partida[i][col]
+                    col += 1
+                   
+
                 texto = str(pista_columna) + "\\" + str(pista_fila)
                 label_x = x + square.winfo_reqwidth() / 2
                 label_y = y + square.winfo_reqheight() / 2
-                label = tk.Label(cuadricula, text=texto, font=('Arial', 8))
-                label.place(x=label_x, y=label_y)
-           
+                label = tk.Label(cuadricula, text=texto, font=('Arial', 10, 'bold'), fg='blue', bg='#888888')
+                label.place(x=label_x, y=label_y, anchor='center')
+            
             cuadricula.create_window(x, y, anchor="nw", window=square)  # Agrega el cuadro al canvas
+            square.numero = None
+            square.config(command=lambda casilla=square: seleccionar_casilla(casilla))
             row.append(square)
         
         squares.append(row)
@@ -197,6 +242,8 @@ def crear_cuadricula(nivel, numero_partida):
 iniciado = False
 cronometro_inicio = 0
 temporizador_finalizado = False
+
+#Botones 
 
 #Funciones botones menu jugar
 
@@ -237,8 +284,8 @@ def iniciar_juego():
             cronometro_inicio = time.time()
             label_cronometro.place(relx=0.85,rely=0.2,anchor='center')
         
-        jugador_label.place(relx=0.15,rely=0.15,anchor='center')
-        nombre_label.place(relx=0.15,rely=0.2,anchor='center')
+        jugador_label.place(relx=0.85,rely=0.3,anchor='center')
+        nombre_label.place(relx=0.85,rely=0.35,anchor='center')
 
 
 
@@ -248,24 +295,61 @@ def iniciar_juego():
         numero_partida = 1
 
         crear_cuadricula(nivel, numero_partida)
+
+        # Crear los botones con números
+
+        for i in range(9):
+            numero = i + 1
+            boton_numero = tk.Button(win, text=str(numero), command=lambda num=numero: seleccionar_numero(num),bg=gris_oscuro,fg='white',width=4)
+            boton_numero.place(relx=0.125,rely=(i/15)+0.1)
+            botones_numeros.append(boton_numero)
+
     print('Iniciar Juego')
 
 def deshacer_jugada():
+    if jugadas_realizadas:
+        # Obtener la última casilla jugada
+        ultima_casilla = jugadas_realizadas.pop()
+        # Limpiar la casilla deshaciendo la jugada
+        ultima_casilla.config(text="")
+        #Añade la jugada antes de borrarle el numero
+        jugadas_deshechas.append((ultima_casilla,ultima_casilla.numero))
+        #borra el numero
+        ultima_casilla.numero = None
+
+
     print('Deshacer Jugada')
 
 def rehacer_jugada():
+    if jugadas_deshechas:
+        # Obtener la última casilla deshecha
+        ultima_jugada = jugadas_deshechas.pop()
+        ultima_casilla=ultima_jugada[0]
+        # Restaurar la jugada rehaciendo la casilla
+        ultima_casilla.config(text=str(ultima_jugada[1]))
+        ultima_casilla.numero=ultima_jugada[1]
+        # Agregar la jugada a la pila de jugadas realizadas
+        jugadas_realizadas.append(ultima_casilla)
     print('Rehacer Jugada')
 
 def borrar_casilla():
     print('Borrar Casilla')
 
 def borrar_juego():
+    for fila in range(9):
+        for columna in range(9):
+            casilla = obtener_casilla(fila, columna)
+            casilla.config(text="")
+            casilla.numero=None
     print('Borrar Juego')
 
 def terminar_juego():
     print('Terminar Juego')
 
 def top_10():
+    for r_i, row in enumerate(squares):
+        for c_i,casilla in enumerate(row):
+            print(f'{r_i},{c_i}',casilla.numero)
     print('Top 10')
     
 def guardar_juego():
@@ -365,7 +449,12 @@ def aplicar_config():
 #Boton para aplicar configuracion
 boton_aplicar=tk.Button(win,text='APLICAR', fg='white',bg = gris_oscuro,font ='Dubai 10 bold',command=aplicar_config)
 
+def ocultar_botones():
+    for boton in botones_numeros:
+        boton.place_forget()
+
 def borrar_items():
+    global botones_numeros, squares
     nivel.place_forget()
     nivel_ck1.place_forget()
     nivel_ck2.place_forget()
@@ -421,8 +510,18 @@ def borrar_items():
         win.after_cancel(countdown_id)
     except:
         pass
+    try:
+        label_cronometro.place_forget()
+    except:
+        pass
+        
     global iniciado
     iniciado = False
+
+    ocultar_botones()
+
+    botones_numeros=[]
+    squares=[]
     
 #Iniciar Timer
 
@@ -503,15 +602,15 @@ archivo_boton=tk.Button(win, text='ABRIR DESDE EXPLORADOR DE ARCHIVOS', fg='whit
 
 def jugar():
     borrar_items()
-    boton_iniciar.place(relx=0.2, rely=0.77, anchor='center')
-    boton_deshacer.place(relx=0.2, rely=0.87, anchor='center')
-    boton_rehacer.place(relx=0.2, rely=0.97, anchor='center')
-    boton_borrar_casilla.place(relx=0.5, rely=0.77, anchor='center')
-    boton_borrar_juego.place(relx=0.5, rely=0.87, anchor='center')
-    boton_terminar.place(relx=0.5, rely=0.97, anchor='center')
-    boton_top.place(relx=0.8, rely=0.77, anchor='center')
-    boton_guardar.place(relx=0.8, rely=0.87, anchor='center')
-    boton_cargar.place(relx=0.8, rely=0.97, anchor='center')
+    boton_iniciar.place(relx=0.2, rely=0.75, anchor='center')
+    boton_deshacer.place(relx=0.2, rely=0.85, anchor='center')
+    boton_rehacer.place(relx=0.2, rely=0.95, anchor='center')
+    boton_borrar_casilla.place(relx=0.5, rely=0.75, anchor='center')
+    boton_borrar_juego.place(relx=0.5, rely=0.85, anchor='center')
+    boton_terminar.place(relx=0.5, rely=0.95, anchor='center')
+    boton_top.place(relx=0.8, rely=0.75, anchor='center')
+    boton_guardar.place(relx=0.8, rely=0.85, anchor='center')
+    boton_cargar.place(relx=0.8, rely=0.95, anchor='center')
 
     nombre_entry.place(relx=0.5, rely=0.45,anchor=tk.CENTER)  
     ingrese_nombre.place(relx=0.5, rely=0.4,anchor=tk.CENTER) 
